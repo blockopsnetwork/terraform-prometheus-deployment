@@ -1,7 +1,7 @@
 # terraform-prometheus-deployment
 Terraform prometheus deployment for GKE
 
-### Preparing to run the module
+### Prerequisites
 
 ```hcl
 
@@ -14,8 +14,6 @@ data "google_container_cluster" "sandbox" {
   location = "<REPLACE_ME>"
   project  = "<REPLACE_ME>"
 }
-
-
 
 # Connect to the kubernetes cluster using the standard provider.
 provider "kubernetes" {
