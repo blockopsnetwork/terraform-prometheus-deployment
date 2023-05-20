@@ -6,12 +6,6 @@ data "google_container_cluster" "sandbox" {
   project  = "evident-bedrock-387111"
 }
 
-# data "kubernetes_namespace" "ns" {
-#   metadata {
-#     name = "monitoring"
-#   }
-# }
-
 provider "kubernetes" {
   host  = "https://${data.google_container_cluster.sandbox.endpoint}"
   token = data.google_client_config.default.access_token

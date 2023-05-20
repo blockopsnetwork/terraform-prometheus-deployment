@@ -172,5 +172,5 @@ variable "allow_volume_expansion" {
 variable "prometheus_domain" {
   type        = string
   description = "dns domain for prometheus ingress"
-  default     = "prometheus.birozuru.tech"
+  default     = null
 }
