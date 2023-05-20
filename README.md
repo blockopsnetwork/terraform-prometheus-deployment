@@ -35,11 +35,18 @@ provider "kubernetes" {
 ```hcl
 module "prometheus" {
 
-    source            = ""
+    source            = "git@github.com:blockops-sh/terraform-prometheus-deployment"
 
     name              = ""
     namespace         = ""
     prometheus_domain = ""
+    volume_size       = ""
+    retention         = ""
+    service_type      = ""
 
+    replicas = {
+        min = ""
+        max = ""
+    }
 }
 ```
