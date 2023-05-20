@@ -5,9 +5,8 @@ Terraform prometheus deployment for GKE
 
 ```hcl
 
-#
+
 # Get kubernetes cluster info.
-#
 data "google_client_config" "default" {}
 
 data "google_container_cluster" "sandbox" {
@@ -17,9 +16,8 @@ data "google_container_cluster" "sandbox" {
 }
 
 
-#
+
 # Connect to the kubernetes cluster using the standard provider.
-#
 provider "kubernetes" {
   host  = "https://${data.google_container_cluster.sandbox.endpoint}"
   token = data.google_client_config.default.access_token
@@ -37,16 +35,16 @@ module "prometheus" {
 
     source            = "git@github.com:blockops-sh/terraform-prometheus-deployment"
 
-    name              = ""
-    namespace         = ""
-    prometheus_domain = ""
-    volume_size       = ""
-    retention         = ""
-    service_type      = ""
+    name              = "prometheus"
+    namespace         = "monitoring"
+    prometheus_domain = "prometheus.example.com"
+    volume_size       = "10Gi"
+    retention         = "7d"
+    service_type      = "ClusterIP"
 
     replicas = {
-        min = ""
-        max = ""
+        min = "1"
+        max = "2"
     }
 }
 ```
