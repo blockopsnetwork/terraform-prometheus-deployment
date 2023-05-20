@@ -1,0 +1,14 @@
+#  Git ignore for terraform project
+
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+*.tfstate
+*.tfstate.backup
+test/.terraform
+test/terraform.tfstate
+test/terraform.tfstate.backup
+test/.terraform.lock.hcl
+.terraform.lock.hcl
+
