@@ -1,9 +1,9 @@
 data "google_client_config" "default" {}
 
 data "google_container_cluster" "sandbox" {
-  name     = "sandbox-dev"
-  location = "europe-west1"
-  project  = "evident-bedrock-387111"
+  name     = ""
+  location = ""
+  project  = ""
 }
 
 provider "kubernetes" {
