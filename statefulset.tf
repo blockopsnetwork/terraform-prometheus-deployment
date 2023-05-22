@@ -83,6 +83,45 @@ resource "kubernetes_stateful_set" "prometheus" {
           }
         }
 
+        init_container {
+          name              = "init-prometheus-config"
+          image             = "busybox:latest"
+          image_pull_policy = "IfNotPresent"
+          command           = ["sh", "-c", "./init-config.sh"]
+
+          env {
+            name = "GRAFANA_USERNAME" 
+              value_from {
+                secret_key_ref {
+                  name = "kubepromsecret"
+                  key  = "username"
+                }
+              }            
+          }
+
+          env {
+            name = "GRAFANA_PASSWORD" 
+              value_from {
+                secret_key_ref {
+                  name = "kubepromsecret"
+                  key  = "password"
+                }
+              }
+          }
+
+
+          volume_mount {
+            name       = "init-config"
+            mount_path = "/init-config.sh"
+            sub_path   = "init-config.sh"
+          }
+
+          volume_mount {
+            name       = "config-volume"
+            mount_path = "/etc/config/prometheus.yml"
+            sub_path   = "prometheus.yml"
+          }
+        }
 
         container {
           name              = "prometheus-server"
@@ -102,6 +141,31 @@ resource "kubernetes_stateful_set" "prometheus" {
             container_port = 9090
           }
 
+          env {
+            name = "GRAFANA_SECRET"
+            value = "kubepromsecret" 
+          }
+
+          env {
+            name = "GRAFANA_USERNAME" 
+              value_from {
+                secret_key_ref {
+                  name = "kubepromsecret"
+                  key  = "username"
+                }
+              }            
+          }
+
+          env {
+            name = "GRAFANA_PASSWORD" 
+              value_from {
+                secret_key_ref {
+                  name = "kubepromsecret"
+                  key  = "password"
+                }
+              }
+          }
+
           resources {
             limits = {
               cpu    = var.prometheus_resource.limits.cpu
@@ -113,12 +177,6 @@ resource "kubernetes_stateful_set" "prometheus" {
             }
           }
 
-          volume_mount {
-            name       = "config-volume"
-            mount_path = "/etc/config/prometheus.yml"
-            sub_path   = "prometheus.yml"
-            read_only  = true
-          }
 
           volume_mount {
             name       = "prometheus-data"
@@ -149,6 +207,19 @@ resource "kubernetes_stateful_set" "prometheus" {
         }
 
         termination_grace_period_seconds = 300
+
+        volume {
+          name = "init-config"
+
+          config_map {
+            name = kubernetes_config_map.prometheus-init-script.metadata.0.name
+            items {
+              key  = "init-config.sh"
+              path = "init-config.sh"
+            }
+            default_mode = "0777"
+          }
+        }
 
         volume {
           name = "config-volume"
