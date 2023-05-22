@@ -1,9 +1,7 @@
 data "google_client_config" "default" {}
 
 data "google_container_cluster" "sandbox" {
-  name     = ""
-  location = ""
-  project  = ""
+
 }
 
 provider "kubernetes" {
