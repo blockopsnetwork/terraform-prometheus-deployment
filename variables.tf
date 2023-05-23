@@ -174,3 +174,21 @@ variable "prometheus_domain" {
   description = "dns domain for prometheus ingress"
   default     = null
 }
+
+variable "kubernetes_grafana_secret_name" {
+  type        = string
+  description = "kubernetes grafana secret name"
+  default     = null
+}
+
+variable "kubernetes_grafana_secret_key" {
+  type = string
+  description = "kubernetes grafana secret key"
+  default = null
+}
+
+variable "kubernetes_grafana_secret_path" {
+  type = string
+  description = "kubernetes grafana secret path"
+  default = null
+}

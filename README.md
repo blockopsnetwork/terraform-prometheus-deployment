@@ -31,14 +31,17 @@ provider "kubernetes" {
 ```hcl
 module "prometheus" {
 
-    source            = "git@github.com:blockops-sh/terraform-prometheus-deployment"
+    source                         = "git@github.com:blockops-sh/terraform-prometheus-deployment"
 
-    name              = "prometheus"
-    namespace         = "monitoring"
-    prometheus_domain = "prometheus.example.com"
-    volume_size       = "10Gi"
-    retention         = "7d"
-    service_type      = "ClusterIP"
+    name                           = "prometheus"
+    namespace                      = "monitoring"
+    prometheus_domain              = "prometheus.example.com"
+    volume_size                    = "10Gi"
+    retention                      = "7d"
+    service_type                   = "ClusterIP"
+    kubernetes_grafana_secret_name = "<secret_name>"
+    kubernetes_grafana_secret_key  = "<secret_key>"
+    kubernetes_grafana_secret_path = "<secret_path>"
 
     replicas = {
         min = "1"

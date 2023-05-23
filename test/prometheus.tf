@@ -1,7 +1,6 @@
 data "google_client_config" "default" {}
 
 data "google_container_cluster" "sandbox" {
-
 }
 
 provider "kubernetes" {
@@ -15,9 +14,12 @@ provider "kubernetes" {
 # Module for prometheus deployment
 module "prometheus" {
 
-  source            = "../"
-  name              = "prometheus"
-  namespace         = "monitoring"
-  prometheus_domain = "prometheus.birozuru.tech"
+  source                         = "../"
+  name                           = "prometheus"
+  namespace                      = "monitoring"
+  prometheus_domain              = "prometheus.birozuru.tech"
+  kubernetes_grafana_secret_name = "kubepromsecret"
+  kubernetes_grafana_secret_key  = "password"
+  kubernetes_grafana_secret_path = "password"
 
 }

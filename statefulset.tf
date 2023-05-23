@@ -83,46 +83,6 @@ resource "kubernetes_stateful_set" "prometheus" {
           }
         }
 
-        init_container {
-          name              = "init-prometheus-config"
-          image             = "busybox:latest"
-          image_pull_policy = "IfNotPresent"
-          command           = ["sh", "-c", "./init-config.sh"]
-
-          env {
-            name = "GRAFANA_USERNAME" 
-              value_from {
-                secret_key_ref {
-                  name = "kubepromsecret"
-                  key  = "username"
-                }
-              }            
-          }
-
-          env {
-            name = "GRAFANA_PASSWORD" 
-              value_from {
-                secret_key_ref {
-                  name = "kubepromsecret"
-                  key  = "password"
-                }
-              }
-          }
-
-
-          volume_mount {
-            name       = "init-config"
-            mount_path = "/init-config.sh"
-            sub_path   = "init-config.sh"
-          }
-
-          volume_mount {
-            name       = "config-volume"
-            mount_path = "/etc/config/prometheus.yml"
-            sub_path   = "prometheus.yml"
-          }
-        }
-
         container {
           name              = "prometheus-server"
           image             = "prom/prometheus:v2.44.0"
@@ -184,6 +144,18 @@ resource "kubernetes_stateful_set" "prometheus" {
             sub_path   = ""
           }
 
+          volume_mount {
+            name       = "config-volume"
+            mount_path = "/etc/config/prometheus.yml"
+            sub_path   = "prometheus.yml"
+          }
+
+          volume_mount {
+            name = "grafana-secret"
+            mount_path = "/etc/config/grafana-secret"
+            read_only = true
+          }
+
           readiness_probe {
             http_get {
               path = "/"
@@ -218,6 +190,18 @@ resource "kubernetes_stateful_set" "prometheus" {
               path = "init-config.sh"
             }
             default_mode = "0777"
+          }
+        }
+
+        volume {
+          name = "grafana-secret"
+
+          secret {
+            secret_name = var.kubernetes_grafana_secret_name
+            items {
+              key  = var.kubernetes_grafana_secret_key
+              path = var.kubernetes_grafana_secret_path
+            }
           }
         }
 
