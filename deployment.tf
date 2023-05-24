@@ -1,5 +1,5 @@
 ## Terraform statefulset resource definition for prometheus
-resource "kubernetes_stateful_set" "prometheus" {
+resource "kubernetes_deployment" "prometheus" {
   metadata {
     name      = local.app_name
     namespace = var.namespace
@@ -7,15 +7,12 @@ resource "kubernetes_stateful_set" "prometheus" {
   }
 
   spec {
-    pod_management_policy  = var.pod_management_policy
     replicas               = var.replicas.min
     revision_history_limit = var.revision_history_limit
 
     selector {
       match_labels = local.selectorLabels
     }
-
-    service_name = local.app_name
 
     template {
       metadata {
@@ -70,19 +67,6 @@ resource "kubernetes_stateful_set" "prometheus" {
           value    = "yes"
         }
 
-        init_container {
-          name              = "init-chown-data"
-          image             = "busybox:latest"
-          image_pull_policy = "IfNotPresent"
-          command           = ["chown", "-R", "65534:65534", "/data"]
-
-          volume_mount {
-            name       = var.volume_mount_name
-            mount_path = "/data"
-            sub_path   = ""
-          }
-        }
-
         container {
           name              = "prometheus-server"
           image             = "prom/prometheus:v2.44.0"
@@ -90,7 +74,6 @@ resource "kubernetes_stateful_set" "prometheus" {
 
           args = [
             "--config.file=/etc/config/prometheus.yml",
-            "--storage.tsdb.path=/data",
             "--web.console.libraries=/etc/prometheus/console_libraries",
             "--web.console.templates=/etc/prometheus/consoles",
             "--web.enable-lifecycle",
@@ -137,13 +120,6 @@ resource "kubernetes_stateful_set" "prometheus" {
             }
           }
 
-
-          volume_mount {
-            name       = "prometheus-data"
-            mount_path = "/data"
-            sub_path   = ""
-          }
-
           volume_mount {
             name       = "config-volume"
             mount_path = "/etc/config/prometheus.yml"
@@ -181,19 +157,6 @@ resource "kubernetes_stateful_set" "prometheus" {
         termination_grace_period_seconds = 300
 
         volume {
-          name = "init-config"
-
-          config_map {
-            name = kubernetes_config_map.prometheus-init-script.metadata.0.name
-            items {
-              key  = "init-config.sh"
-              path = "init-config.sh"
-            }
-            default_mode = "0777"
-          }
-        }
-
-        volume {
           name = "grafana-secret"
 
           secret {
@@ -214,38 +177,6 @@ resource "kubernetes_stateful_set" "prometheus" {
               key  = "prometheus.yml"
               path = "prometheus.yml"
             }
-          }
-        }
-        volume {
-          name = var.volume_mount_name
-
-          persistent_volume_claim {
-            claim_name = var.volume_mount_name
-          }
-        }
-      }
-    }
-
-    update_strategy {
-      type = "RollingUpdate"
-
-      rolling_update {
-        partition = 1
-      }
-    }
-
-    volume_claim_template {
-      metadata {
-        name = var.volume_mount_name
-      }
-
-      spec {
-        access_modes       = ["ReadWriteOnce"]
-        storage_class_name = local.app_name
-
-        resources {
-          requests = {
-            storage = var.volume_size
           }
         }
       }
