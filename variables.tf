@@ -182,13 +182,13 @@ variable "kubernetes_grafana_secret_name" {
 }
 
 variable "kubernetes_grafana_secret_key" {
-  type = string
+  type        = string
   description = "kubernetes grafana secret key"
-  default = null
+  default     = null
 }
 
 variable "kubernetes_grafana_secret_path" {
-  type = string
+  type        = string
   description = "kubernetes grafana secret path"
-  default = null
+  default     = null
 }

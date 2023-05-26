@@ -85,28 +85,28 @@ resource "kubernetes_deployment" "prometheus" {
           }
 
           env {
-            name = "GRAFANA_SECRET"
-            value = "kubepromsecret" 
+            name  = "GRAFANA_SECRET"
+            value = "kubepromsecret"
           }
 
           env {
-            name = "GRAFANA_USERNAME" 
-              value_from {
-                secret_key_ref {
-                  name = "kubepromsecret"
-                  key  = "username"
-                }
-              }            
-          }
-
-          env {
-            name = "GRAFANA_PASSWORD" 
-              value_from {
-                secret_key_ref {
-                  name = "kubepromsecret"
-                  key  = "password"
-                }
+            name = "GRAFANA_USERNAME"
+            value_from {
+              secret_key_ref {
+                name = "kubepromsecret"
+                key  = "username"
               }
+            }
+          }
+
+          env {
+            name = "GRAFANA_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = "kubepromsecret"
+                key  = "password"
+              }
+            }
           }
 
           resources {
@@ -127,9 +127,9 @@ resource "kubernetes_deployment" "prometheus" {
           }
 
           volume_mount {
-            name = "grafana-secret"
+            name       = "grafana-secret"
             mount_path = "/etc/config/grafana-secret"
-            read_only = true
+            read_only  = true
           }
 
           readiness_probe {
@@ -178,6 +178,100 @@ resource "kubernetes_deployment" "prometheus" {
               path = "prometheus.yml"
             }
           }
+        }
+      }
+    }
+  }
+}
+
+
+resource "kubernetes_deployment" "kube_state_metrics" {
+  metadata {
+    name      = "kube-state-metrics"
+    namespace = var.namespace
+    labels    = local.labels
+  }
+
+  spec {
+    replicas               = var.replicas.min
+    revision_history_limit = var.revision_history_limit
+
+    selector {
+      match_labels = local.selectorLabels
+    }
+
+    template {
+      metadata {
+        labels      = local.selectorLabels
+        annotations = {}
+      }
+
+      spec {
+        service_account_name = kubernetes_service_account.kube_state_metrics.metadata.0.name
+        node_selector        = var.deployment_node_selector
+        priority_class_name  = var.priority_class_name
+
+        affinity {
+          pod_anti_affinity {
+            required_during_scheduling_ignored_during_execution {
+              topology_key = "kubernetes.io/hostname"
+              label_selector {
+                match_expressions {
+                  key      = "app.kubernetes.io/app"
+                  operator = "In"
+                  values   = [local.app_name]
+                }
+              }
+            }
+          }
+
+          node_affinity {
+            preferred_during_scheduling_ignored_during_execution {
+              weight = 1
+              preference {
+                match_expressions {
+                  key      = "restart"
+                  operator = "In"
+                  values   = ["unlikely"]
+                }
+              }
+            }
+          }
+        }
+
+        toleration {
+          effect   = "NoSchedule"
+          key      = "onlyfor"
+          operator = "Equal"
+          value    = "highcpu"
+        }
+
+        toleration {
+          effect   = "NoSchedule"
+          key      = "dbonly"
+          operator = "Equal"
+          value    = "yes"
+        }
+
+        container {
+          name              = "kube-state-metrics"
+          image             = "quay.io/coreos/kube-state-metrics:v1.9.7"
+          image_pull_policy = "IfNotPresent"
+
+          port {
+            container_port = 8080
+          }
+
+          readiness_probe {
+            http_get {
+              path = "/healthz"
+              port = 8080
+            }
+
+            initial_delay_seconds = 15
+            timeout_seconds       = 5
+          }
+
         }
       }
     }
