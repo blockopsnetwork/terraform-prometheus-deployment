@@ -11,6 +11,8 @@ remote_write:
       username: "1001215"
       password_file: /etc/config/grafana-secret/password
 
+rule_files:
+  - "/etc/config/prometheus.rules"
 
 scrape_configs:
   - job_name: prometheus
@@ -62,25 +64,25 @@ scrape_configs:
         target_label: kubernetes_pod_name
 
 
-  # - job_name: 'kubernetes-kube-state'
-  #   kubernetes_sd_configs:
-  #     - role: pod
-  #   relabel_configs:
-  #    - action: labelmap
-  #      regex: __meta_kubernetes_pod_label_(.+)
-  #    - source_labels: [__meta_kubernetes_namespace]
-  #      action: replace
-  #      target_label: kubernetes_namespace
-  #    - source_labels: [__meta_kubernetes_pod_name]
-  #      action: replace
-  #      target_label: kubernetes_pod_name
-  #    - source_labels: [__meta_kubernetes_pod_label_grafanak8sapp]
-  #      regex: .*true.*
-  #      action: keep
-  #    - source_labels: ['__meta_kubernetes_pod_label_daemon', '__meta_kubernetes_pod_node_name']
-  #      regex: 'node-exporter;(.*)'
-  #      action: replace
-  #      target_label: nodename
+  - job_name: 'kubernetes-kube-state'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+     - action: labelmap
+       regex: __meta_kubernetes_pod_label_(.+)
+     - source_labels: [__meta_kubernetes_namespace]
+       action: replace
+       target_label: kubernetes_namespace
+     - source_labels: [__meta_kubernetes_pod_name]
+       action: replace
+       target_label: kubernetes_pod_name
+     - source_labels: [__meta_kubernetes_pod_label_grafanak8sapp]
+       regex: .*true.*
+       action: keep
+     - source_labels: ['__meta_kubernetes_pod_label_daemon', '__meta_kubernetes_pod_node_name']
+       regex: 'node-exporter;(.*)'
+       action: replace
+       target_label: nodename
 
 
   # - job_name: "kubernetes-nodes"

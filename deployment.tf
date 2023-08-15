@@ -53,20 +53,6 @@ resource "kubernetes_deployment" "prometheus" {
           }
         }
 
-        toleration {
-          effect   = "NoSchedule"
-          key      = "onlyfor"
-          operator = "Equal"
-          value    = "highcpu"
-        }
-
-        toleration {
-          effect   = "NoSchedule"
-          key      = "dbonly"
-          operator = "Equal"
-          value    = "yes"
-        }
-
         container {
           name              = "prometheus-server"
           image             = "prom/prometheus:v2.44.0"
@@ -127,6 +113,12 @@ resource "kubernetes_deployment" "prometheus" {
           }
 
           volume_mount {
+            name       = "config-volume"
+            mount_path = "/etc/config/prometheus.rules"
+            sub_path   = "prometheus.rules"
+          }
+
+          volume_mount {
             name       = "grafana-secret"
             mount_path = "/etc/config/grafana-secret"
             read_only  = true
@@ -179,6 +171,18 @@ resource "kubernetes_deployment" "prometheus" {
             }
           }
         }
+
+        volume {
+          name = "alert-rules"
+
+          config_map {
+            name = kubernetes_config_map.global-config.metadata.0.name
+            items {
+              key  = "prometheus.rules"
+              path = "prometheus.rules"
+            }
+          }
+        }
       }
     }
   }
@@ -189,7 +193,13 @@ resource "kubernetes_deployment" "kube_state_metrics" {
   metadata {
     name      = "kube-state-metrics"
     namespace = var.namespace
-    labels    = local.labels
+    labels = {
+      "app.kubernetes.io/name"       = "kube-state-metrics"
+      "app.kubernetes.io/owner"      = "sre"
+      "app.kubernetes.io/managed-by" = "Terraform"
+      "app.kubernetes.io/component"  = "exporter"
+      "app.kubernetes.io/version"    = "2.9.2"
+    }
   }
 
   spec {
@@ -260,6 +270,12 @@ resource "kubernetes_deployment" "kube_state_metrics" {
 
           port {
             container_port = 8080
+            name           = "http-metrics"
+          }
+
+          port {
+            container_port = 8081
+            name           = "telemetry"
           }
 
           readiness_probe {

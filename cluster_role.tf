@@ -49,8 +49,14 @@ resource "kubernetes_cluster_role_binding" "prometheus" {
 
 resource "kubernetes_cluster_role" "kube_state_metrics" {
   metadata {
-    name   = "kube-state-metrics"
-    labels = local.labels
+    name = "kube-state-metrics"
+    labels = {
+      "app.kubernetes.io/app"        = "kube-state-metrics"
+      "app.kubernetes.io/owner"      = "sre"
+      "app.kubernetes.io/managed-by" = "Terraform"
+      "app.kubernetes.io/component"  = "exporter"
+      "app.kubernetes.io/version"    = "2.9.2"
+    }
   }
 
   rule {
@@ -86,8 +92,14 @@ resource "kubernetes_cluster_role" "kube_state_metrics" {
 
 resource "kubernetes_cluster_role_binding" "kube_state_metrics" {
   metadata {
-    name   = "kube-state-metrics"
-    labels = local.labels
+    name = "kube-state-metrics"
+    labels = {
+      "app.kubernetes.io/app"        = "kube-state-metrics"
+      "app.kubernetes.io/owner"      = "sre"
+      "app.kubernetes.io/managed-by" = "Terraform"
+      "app.kubernetes.io/component"  = "exporter"
+      "app.kubernetes.io/version"    = "2.9.2"
+    }
   }
 
   role_ref {
