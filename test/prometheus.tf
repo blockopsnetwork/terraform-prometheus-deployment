@@ -16,8 +16,7 @@ provider "kubernetes" {
 
 # Module for prometheus deployment
 module "prometheus" {
-
-  source                         = "../"
+  source                         = "../modules/prometheus"
   name                           = "prometheus"
   namespace                      = "monitoring"
   prometheus_domain              = "prometheus.birozuru.tech"
