@@ -113,12 +113,6 @@ resource "kubernetes_deployment" "prometheus" {
           }
 
           volume_mount {
-            name       = "config-volume"
-            mount_path = "/etc/config/prometheus.rules"
-            sub_path   = "prometheus.rules"
-          }
-
-          volume_mount {
             name       = "grafana-secret"
             mount_path = "/etc/config/grafana-secret"
             read_only  = true
@@ -168,18 +162,6 @@ resource "kubernetes_deployment" "prometheus" {
             items {
               key  = "prometheus.yml"
               path = "prometheus.yml"
-            }
-          }
-        }
-
-        volume {
-          name = "alert-rules"
-
-          config_map {
-            name = kubernetes_config_map.global-config.metadata.0.name
-            items {
-              key  = "prometheus.rules"
-              path = "prometheus.rules"
             }
           }
         }

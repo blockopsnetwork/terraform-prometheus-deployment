@@ -11,9 +11,6 @@ remote_write:
       username: "1001215"
       password_file: /etc/config/grafana-secret/password
 
-rule_files:
-  - "/etc/config/prometheus.rules"
-
 scrape_configs:
   - job_name: prometheus
     static_configs:

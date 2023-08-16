@@ -5,7 +5,6 @@ resource "kubernetes_config_map" "global-config" {
   }
 
   data = {
-    "prometheus.yml"   = file("${path.module}/files/prometheus.yml")
-    "prometheus.rules" = file("${path.module}/files/prometheus.rules")
+    "prometheus.yml" = file("${path.module}/files/prometheus.yml")
   }
 }
