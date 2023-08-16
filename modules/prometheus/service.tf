@@ -28,3 +28,4 @@ resource "kubernetes_service" "prometheus" {
     }
   }
 }
+

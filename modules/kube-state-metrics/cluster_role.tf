@@ -1,56 +1,13 @@
-resource "kubernetes_cluster_role" "prometheus" {
-  metadata {
-    name   = local.app_name
-    labels = local.labels
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["configmaps", "endpoints", "nodes", "pods", "secrets", "services", "nodes/proxy", "nodes/metrics"]
-    verbs      = ["get", "list", "watch"]
-  }
-
-  rule {
-    api_groups = ["extensions", "networking.k8s.io"]
-    resources  = ["ingresses"]
-    verbs      = ["get", "list", "watch"]
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["events"]
-    verbs      = ["create", "patch"]
-  }
-
-  rule {
-    non_resource_urls = ["/metrics"]
-    verbs             = ["get"]
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "prometheus" {
-  metadata {
-    name   = local.app_name
-    labels = local.labels
-  }
-
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.prometheus.metadata.0.name
-  }
-
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account.prometheus.metadata.0.name
-    namespace = kubernetes_service_account.prometheus.metadata.0.namespace
-  }
-}
-
 resource "kubernetes_cluster_role" "kube_state_metrics" {
   metadata {
-    name   = "kube-state-metrics"
-    labels = local.labels
+    name = "kube-state-metrics"
+    labels = {
+      "app.kubernetes.io/app"        = "kube-state-metrics"
+      "app.kubernetes.io/owner"      = "sre"
+      "app.kubernetes.io/managed-by" = "Terraform"
+      "app.kubernetes.io/component"  = "exporter"
+      "app.kubernetes.io/version"    = "2.9.2"
+    }
   }
 
   rule {
@@ -86,8 +43,14 @@ resource "kubernetes_cluster_role" "kube_state_metrics" {
 
 resource "kubernetes_cluster_role_binding" "kube_state_metrics" {
   metadata {
-    name   = "kube-state-metrics"
-    labels = local.labels
+    name = "kube-state-metrics"
+    labels = {
+      "app.kubernetes.io/app"        = "kube-state-metrics"
+      "app.kubernetes.io/owner"      = "sre"
+      "app.kubernetes.io/managed-by" = "Terraform"
+      "app.kubernetes.io/component"  = "exporter"
+      "app.kubernetes.io/version"    = "2.9.2"
+    }
   }
 
   role_ref {

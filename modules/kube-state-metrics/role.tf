@@ -1,52 +1,12 @@
-resource "kubernetes_role" "prometheus" {
-  metadata {
-    name      = local.app_name
-    namespace = var.namespace
-    labels    = local.labels
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["namespaces"]
-    verbs      = ["get"]
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["configmaps", "pods", "secrets", "endpoints"]
-    verbs      = ["get", "list", "watch"]
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["services"]
-    verbs      = ["get", "list", "watch"]
-  }
-
-  rule {
-    api_groups = ["extensions", "networking.k8s.io"]
-    resources  = ["ingresses"]
-    verbs      = ["get", "list", "watch"]
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["configmaps"]
-    verbs      = ["create", "update"]
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["events"]
-    verbs      = ["create", "patch"]
-  }
-}
-
 resource "kubernetes_role" "kube_state_metrics" {
   metadata {
     name      = "kube-state-metrics"
-    namespace = var.namespace
-    labels    = local.labels
+    namespace = "kube-system"
+    labels    = {
+        "app.kubernetes.io/app"        = "kube-state-metrics"
+        "app.kubernetes.io/owner"      = "sre"
+        "app.kubernetes.io/managed-by" = "Terraform"
+    }
   }
 
   rule {
@@ -66,8 +26,12 @@ resource "kubernetes_role" "kube_state_metrics" {
 resource "kubernetes_role_binding" "kube_state_metrics" {
   metadata {
     name      = "kube-state-metrics"
-    namespace = var.namespace
-    labels    = local.labels
+    namespace = "kube-system"
+    labels    = {
+        "app.kubernetes.io/app"        = "kube-state-metrics"
+        "app.kubernetes.io/owner"      = "sre"
+        "app.kubernetes.io/managed-by" = "Terraform"
+    } 
   }
 
   role_ref {
